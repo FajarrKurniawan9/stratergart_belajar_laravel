@@ -17,9 +17,22 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'email_verified_at' => now(),
+                'password' => bcrypt('password'),
+            ]
+        );
+
+        // Urutan penting karena relasi FK:
+        // Kelas (1) -> Siswa (N) -> Kartu Pelajar (1:1)
+        // Total: 6 kelas, 50 siswa, 50 kartu pelajar
+        $this->call([
+            KelasSeeder::class,
+            SiswaSeeder::class,
+            KartuPelajarSeeder::class,
         ]);
     }
 }
