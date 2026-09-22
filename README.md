@@ -1,58 +1,166 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel API — Kelas, Siswa, Kartu Pelajar
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+REST API sederhana untuk data sekolah dengan relasi:
 
-## About Laravel
+- **Kelas (1) → Siswa (N)**: 1 kelas punya banyak siswa
+- **Siswa (1) → Kartu Pelajar (1)**: 1 siswa punya 1 kartu pelajar
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Stack: Laravel 13, PHP ^8.3, SQLite (default), Sanctum.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 1. Prasyarat
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP >= 8.3 (`php -v`)
+- Composer (`composer -V`)
+- Git (opsional)
 
-## Learning Laravel
+## 2. Instalasi & Menjalankan
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```sh
+# 1. Masuk ke folder project
+cd laravelapi
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+# 2. Install dependency
+composer install
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+# 3. Copy env (jika belum ada .env)
+cp .env.example .env
 
-## Agentic Development
+# 4. Generate app key
+php artisan key:generate
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+# 5. Buat file SQLite jika belum ada (default DB_CONNECTION=sqlite)
+touch database/database.sqlite
 
-```bash
-composer require laravel/boost --dev
+# 6. Migrasi + seeder (6 kelas, 50 siswa nama Indonesia, 50 kartu pelajar)
+php artisan migrate:fresh --seed
 
-php artisan boost:install
+# 7. Jalankan server
+php artisan serve
+# API tersedia di: http://localhost:8000/api
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Perintah berguna lain:
 
-## Contributing
+```sh
+# Migrasi saja
+php artisan migrate
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# Seeder saja (aman dijalankan berulang, pakai firstOrCreate / top-up 50)
+php artisan db:seed
 
-## Code of Conduct
+# Seeder per tabel
+php artisan db:seed --class=KelasSeeder
+php artisan db:seed --class=SiswaSeeder
+php artisan db:seed --class=KartuPelajarSeeder
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# Lihat daftar route API
+php artisan route:list --path=api
 
-## Security Vulnerabilities
+# Jalankan test
+php artisan test
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 3. Konfigurasi Database
 
-## License
+Default memakai SQLite (`.env`):
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```
+DB_CONNECTION=sqlite
+```
+
+Untuk MySQL, ubah `.env`:
+
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=laravelapi
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Lalu jalankan `php artisan migrate:fresh --seed`.
+
+Faker locale untuk nama Indonesia:
+
+```
+APP_FAKER_LOCALE=id_ID
+```
+
+## 4. Daftar Endpoint
+
+Base URL: `http://localhost:8000/api`
+
+| Method | URL | Keterangan |
+|--------|-----|------------|
+| GET | `/api/kelas` | List semua kelas + siswa + kartu |
+| POST | `/api/kelas` | Buat kelas |
+| GET | `/api/kelas/{id}` | Detail kelas |
+| PUT/PATCH | `/api/kelas/{id}` | Update kelas |
+| DELETE | `/api/kelas/{id}` | Hapus kelas |
+| GET | `/api/siswa` | List semua siswa + kelas + kartu |
+| POST | `/api/siswa` | Buat siswa |
+| GET | `/api/siswa/{id}` | Detail siswa |
+| PUT/PATCH | `/api/siswa/{id}` | Update siswa |
+| DELETE | `/api/siswa/{id}` | Hapus siswa |
+| GET | `/api/kartu-pelajar` | List semua kartu + siswa + kelas |
+| POST | `/api/kartu-pelajar` | Buat kartu |
+| GET | `/api/kartu-pelajar/{id}` | Detail kartu |
+| PUT/PATCH | `/api/kartu-pelajar/{id}` | Update kartu |
+| DELETE | `/api/kartu-pelajar/{id}` | Hapus kartu |
+
+Dokumentasi lengkap tiap endpoint (parameter, body JSON, contoh response) ada di komentar atas file `routes/api.php`.
+
+## 5. Contoh Request (cURL)
+
+```sh
+# List siswa
+curl http://localhost:8000/api/siswa
+
+# Buat kelas
+curl -X POST http://localhost:8000/api/kelas \
+  -H "Content-Type: application/json" \
+  -d '{"nama_kelas":"X RPL 1"}'
+
+# Buat siswa (id_kelas harus ada di tabel kelas)
+curl -X POST http://localhost:8000/api/siswa \
+  -H "Content-Type: application/json" \
+  -d '{"nama":"Budi Santoso","id_kelas":1}'
+
+# Buat kartu pelajar (id_siswa harus ada & belum punya kartu)
+curl -X POST http://localhost:8000/api/kartu-pelajar \
+  -H "Content-Type: application/json" \
+  -d '{"nomor_kartu":"KP-2026-000001","id_siswa":1}'
+
+# Update siswa
+curl -X PUT http://localhost:8000/api/siswa/1 \
+  -H "Content-Type: application/json" \
+  -d '{"nama":"Budi Pratama"}'
+
+# Hapus kartu
+curl -X DELETE http://localhost:8000/api/kartu-pelajar/1
+```
+
+## 6. Validasi
+
+**Kelas:** `nama_kelas` required, string, max 255.
+
+**Siswa:** `nama` required string max 255, `id_kelas` required dan harus ada di `kelas.id`.
+
+**Kartu Pelajar:** `nomor_kartu` required string max 255 unique, `id_siswa` required, harus ada di `siswas.id`, dan unique (1 siswa = 1 kartu).
+
+## 7. Seeder (50 Data)
+
+Seeder dijalankan urut via `DatabaseSeeder`:
+
+1. `KelasSeeder` — 6 kelas tetap (`X RPL 1`, `X TKJ 1`, `XI RPL 1`, `XI TKJ 1`, `XII RPL 1`, `XII TKJ 1`) pakai `firstOrCreate`.
+2. `SiswaSeeder` — top-up sampai 50 via `SiswaFactory` (nama Indonesia, `fake('id_ID')`).
+3. `KartuPelajarSeeder` — 1 kartu per siswa yang belum punya kartu, format `KP-YYYY-XXXXXX` unique.
+
+Factory: `database/factories/KelasFactory.php`, `SiswaFactory.php`, `KartuPelajarFactory.php`.
+
+## 8. Troubleshooting
+
+- `UNIQUE constraint failed: users.email` saat `db:seed` → sudah diperbaiki dengan `User::firstOrCreate()`. Tinggal jalankan `php artisan db:seed` ulang, tidak perlu fresh.
+- `SQLSTATE ... database.sqlite ...` → pastikan file `database/database.sqlite` ada, lalu `php artisan migrate`.
+- Validasi `id_kelas` / `id_siswa` gagal → pastikan id yang dikirim benar-benar ada (cek via GET list dulu).
