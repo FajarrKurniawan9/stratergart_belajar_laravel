@@ -140,27 +140,3 @@ curl -X PUT http://localhost:8000/api/siswa/1 \
 # Hapus kartu
 curl -X DELETE http://localhost:8000/api/kartu-pelajar/1
 ```
-
-## 6. Validasi
-
-**Kelas:** `nama_kelas` required, string, max 255.
-
-**Siswa:** `nama` required string max 255, `id_kelas` required dan harus ada di `kelas.id`.
-
-**Kartu Pelajar:** `nomor_kartu` required string max 255 unique, `id_siswa` required, harus ada di `siswas.id`, dan unique (1 siswa = 1 kartu).
-
-## 7. Seeder (50 Data)
-
-Seeder dijalankan urut via `DatabaseSeeder`:
-
-1. `KelasSeeder` — 6 kelas tetap (`X RPL 1`, `X TKJ 1`, `XI RPL 1`, `XI TKJ 1`, `XII RPL 1`, `XII TKJ 1`) pakai `firstOrCreate`.
-2. `SiswaSeeder` — top-up sampai 50 via `SiswaFactory` (nama Indonesia, `fake('id_ID')`).
-3. `KartuPelajarSeeder` — 1 kartu per siswa yang belum punya kartu, format `KP-YYYY-XXXXXX` unique.
-
-Factory: `database/factories/KelasFactory.php`, `SiswaFactory.php`, `KartuPelajarFactory.php`.
-
-## 8. Troubleshooting
-
-- `UNIQUE constraint failed: users.email` saat `db:seed` → sudah diperbaiki dengan `User::firstOrCreate()`. Tinggal jalankan `php artisan db:seed` ulang, tidak perlu fresh.
-- `SQLSTATE ... database.sqlite ...` → pastikan file `database/database.sqlite` ada, lalu `php artisan migrate`.
-- Validasi `id_kelas` / `id_siswa` gagal → pastikan id yang dikirim benar-benar ada (cek via GET list dulu).
